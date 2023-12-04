@@ -14,6 +14,12 @@ var specularOn;
 var vertexNormals;
 var faceNormals;
 var alpha;
+var thetaUniform;
+var theta;
+var Rotation;
+var rotationMatrix;
+var M;
+var modelViewMatrix;
 
 async function initGL() {
   var canvas = document.getElementById("gl-canvas");
@@ -29,6 +35,10 @@ async function initGL() {
 
   myShaderProgram = initShaders(gl, "vertex-shader", "fragment-shader");
   gl.useProgram(myShaderProgram);
+
+  theta = 0.0;
+  thetaUniform = gl.getUniformLocation(myShaderProgram, "theta");
+  gl.uniform1f(thetaUniform, theta);
 
   // The following block of code together with the
   // definitions in object.js are provided for diagnosis
@@ -103,7 +113,7 @@ async function initGL() {
     1.0
   );
 
-  var M = inverse(minv);
+  M = inverse(minv);
 
   near = 0.001;
 
@@ -118,10 +128,30 @@ async function initGL() {
 
   alpha = 1;
 
-  var modelViewMatrix = gl.getUniformLocation(
-    myShaderProgram,
-    "modelViewMatrix"
+  Rotation = mat4(
+    Math.cos(theta),
+    0.0,
+    -Math.sin(theta),
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    Math.sin(theta),
+    0.0,
+    Math.cos(theta),
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
   );
+
+  console.log(M);
+  M = multiply(Rotation, M);
+  console.log(M);
+
+  modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
   gl.uniformMatrix4fv(modelViewMatrix, false, flatten(M));
 
   projectionMatrix = gl.getUniformLocation(myShaderProgram, "projectionMatrix");
@@ -372,4 +402,64 @@ async function loadPlyModel(url) {
   }
 
   return { vertices, indices };
+}
+
+function multiply(A, B) {
+  var res = mat4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  var N = 4;
+  for (var i = 0; i < N; i++) {
+    for (var j = 0; j < N; j++) {
+      for (var k = 0; k < N; k++) {
+        res[i][j] += A[i][k] * B[k][j];
+      }
+    }
+  }
+  return res;
+}
+
+function rotate(value) {
+  // Force WebGL context to clear the color buffer
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  theta += value; // rotat positive
+  //clipX += moveRight * nudge;
+  //clipY += moveUp * nudge;
+
+  gl.uniform1f(thetaUniform, theta);
+  //gl.uniform2f(mousePositionUniform, clipX, clipY);
+
+  Rotation = mat4(
+    Math.cos(theta),
+    0.0,
+    -Math.sin(theta),
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    Math.sin(theta),
+    0.0,
+    Math.cos(theta),
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
+  );
+  console.log(M);
+  var MNew = multiply(Rotation, M);
+  console.log(Rotation);
+  console.log(MNew);
+
+  modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
+  gl.uniformMatrix4fv(modelViewMatrix, false, flatten(MNew));
+  drawObject();
+}
+
+function rotatePos() {
+  rotate(0.1);
+}
+
+function rotateNeg() {
+  rotate(-0.1);
 }
