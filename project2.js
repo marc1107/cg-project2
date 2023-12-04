@@ -81,8 +81,6 @@ async function initGL() {
   gl.vertexAttribPointer(vertexPosition, 4, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vertexPosition);
 
-  // Insert your code here
-
   var e = vec3(0.0, 0.0, 4.0);
   var a = vec3(14.0, 0.0, 0.0);
   var vup = vec3(0.0, 1.0, 0.0);
@@ -147,9 +145,7 @@ async function initGL() {
     1.0
   );
 
-  console.log(M);
   M = multiply(Rotation, M);
-  console.log(M);
 
   modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
   gl.uniformMatrix4fv(modelViewMatrix, false, flatten(M));
@@ -446,11 +442,8 @@ function rotate(value) {
     0.0,
     1.0
   );
-  console.log(M);
-  var MNew = multiply(Rotation, M);
-  console.log(Rotation);
-  console.log(MNew);
 
+  var MNew = multiply(Rotation, M);
   modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
   gl.uniformMatrix4fv(modelViewMatrix, false, flatten(MNew));
   drawObject();
