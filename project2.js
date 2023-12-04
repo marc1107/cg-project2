@@ -155,38 +155,6 @@ async function initGL() {
   light2();
 }
 
-function orthographic() {
-  var increase = 7000;
-  right = near * Math.tan(fovy / 2) * aspect * increase;
-  left = -right;
-
-  test = near * Math.tan(fovy / 2) * increase;
-  bottom = -test;
-
-  var pOrthographic = mat4(
-    2 / (right - left),
-    0,
-    0,
-    -(right + left) / (right - left),
-    0,
-    2 / (test - bottom),
-    0,
-    -(test + bottom) / (test - bottom),
-    0,
-    0,
-    -2 / (far - near),
-    -(far + near) / (far - near),
-    0,
-    0,
-    0,
-    1
-  );
-
-  gl.uniformMatrix4fv(projectionMatrix, false, flatten(pOrthographic));
-
-  drawObject();
-}
-
 function perspective() {
   test = near * Math.tan(fovy);
   right = test * aspect;
