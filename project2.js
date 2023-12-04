@@ -153,7 +153,6 @@ async function initGL() {
   perspective();
   light1();
   light2();
-
 }
 
 function orthographic() {
@@ -218,7 +217,7 @@ function perspective() {
 }
 
 function light1() {
-  isLight1On = 1 - isLight1On;
+  isLight1On = 1;
 
   var p0 = vec3(1.2, 0.8, 1.9); // Point light position
   var Ia = vec3(0.2 * isLight1On, 0.2 * isLight1On, 0.2 * isLight1On); // Ambient light intensity
@@ -256,7 +255,7 @@ function light1() {
 }
 
 function light2() {
-  isLight2On = 1 - isLight2On;
+  isLight2On = 1;
 
   var p0 = vec3(1.5, 0.0, -1.5);
   var Ia = vec3(1.0 * isLight2On, 1.0 * isLight2On, 1.0 * isLight2On);
@@ -266,7 +265,6 @@ function light2() {
   var ka = vec3(0.9, 0.2, 0.2);
   var kd = vec3(0.9, 0.2, 0.2);
   var ks = vec3(1.0, 1.0, 1.0);
- 
 
   // send the light source position to the shader
   var p0loc = gl.getUniformLocation(myShaderProgram, "p0");
@@ -308,7 +306,7 @@ function light2() {
 }
 
 function specular() {
-  specularOn = 1 - specularOn;
+  specularOn = 1;
 
   var specularOnLoc = gl.getUniformLocation(myShaderProgram, "specularOn");
   gl.uniform1f(specularOnLoc, specularOn);
