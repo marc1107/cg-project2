@@ -40,19 +40,7 @@ async function initGL() {
   thetaUniform = gl.getUniformLocation(myShaderProgram, "theta");
   gl.uniform1f(thetaUniform, theta);
 
-  // The following block of code together with the
-  // definitions in object.js are provided for diagnosis
-  //
-  // For full credit, REPLACE THE FOLLOWING BLOCK with
-  // a block that loads the vertices and faces from the provided ply file
-  // You are encouraged to explore THREE.js by using ChatGPT
-  // to investigate how to load a PLY file and get
-  // access to the vertices and faces
-  //
 
-  /* vertices = getVertices(); // currently defined in object.js
-  indexList = getFaces();
-  t = getFaces(); */
 
   // load the object.ply model instead of using the object.js
   const model = await loadPlyModel("./object.ply");
@@ -175,6 +163,7 @@ async function initGL() {
 
   var alphaloc = gl.getUniformLocation(myShaderProgram, "alpha");
   gl.uniform1f(alphaloc, alpha);
+  
 
   perspective();
   light1();
