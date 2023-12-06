@@ -4,12 +4,18 @@
     <script id="vertex-shader" type="x-shader/x-vertex">
 		precision mediump float;
 		attribute vec4 vertexPosition;
-		uniform mat4 modelViewMatrix;
-		uniform mat4 projectionMatrix;
-      	uniform mat4 rotationMatrix;
-		uniform float theta;
+      	uniform mat4 modelViewMatrix;
+      	uniform mat4 projectionMatrix;
+		uniform mat4 M_x;
+		uniform mat4 M_y;
+		uniform mat4 M;
+		mat4 M_tz;
+		mat4 M_sz;
+        uniform float theta;
+        attribute vec2 textureCoordinate;
+	  	varying vec2 fTextureCoordinate;
 
-		attribute vec3 nv; // normal vector
+        attribute vec3 nv; // normal vector
 
 		// uniform for controlling specular reflection
 		uniform float specularOn;
@@ -130,16 +136,26 @@
 				R = clamp( Ra1 + Rd1 + Rs1, 0.0, 1.0);
 			}
 
-         	gl_Position =  projectionMatrix * modelViewMatrix * vertexPosition; // * rotationMatrix;
+			gl_Position =  projectionMatrix * modelViewMatrix  * vertexPosition; // * rotationMatrix;
+				// Interpolate the texture coordinate to the fragments.
+			fTextureCoordinate = textureCoordinate;
 		}
     </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
-    	precision mediump float;
-		varying vec3 R;
-		void main() {
-			gl_FragColor = vec4( R.r, R.g, R.b, 1.0 );
-		}
+        	precision mediump float;
+      varying vec3 R;
+      varying vec2 fTextureCoordinate;
+      uniform sampler2D texMap0;
+      uniform sampler2D texMap1;
+      void main() {
+      	vec4 color0 = texture2D( texMap0, fTextureCoordinate );
+      	vec4 color1 = texture2D( texMap1, fTextureCoordinate );
+      	gl_FragColor.r = color0.r * color1.r + R.r;
+      	gl_FragColor.g = color0.g * color1.g + R.g;
+      	gl_FragColor.b = color0.b * color1.b + R.b;
+      	gl_FragColor.a = 1.0;
+      }
     </script>
 
     <script type="text/javascript" src="./Common/webgl-utils.js"></script>
@@ -153,7 +169,11 @@
     <br />
     <div>
       <button id="rotateButton" onclick="rotatePos()">Rotate</button>
-      <button id="rotateNegButton" onclick="rotateNeg()">Rotate Negative</button>
+      <button id="rotateNegButton" onclick="rotateNeg()">
+        Rotate Negative
+      </button>
+	  <button id="moveXPosButton" onclick="moveXPos()">Move X Positive</button>
+	  <button id="moveXNegButton" onclick="moveXNeg()">Move X Negative</button>
     </div>
   </body>
 </html>

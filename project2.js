@@ -20,6 +20,13 @@ var Rotation;
 var rotationMatrix;
 var M;
 var modelViewMatrix;
+var M_x;
+var M_y;
+var vertexbuffer;
+var vertexPosition;
+var textureVertexbuffer;
+var textureCoordinate;
+var clipX;
 
 async function initGL() {
   var canvas = document.getElementById("gl-canvas");
@@ -40,49 +47,10 @@ async function initGL() {
   thetaUniform = gl.getUniformLocation(myShaderProgram, "theta");
   gl.uniform1f(thetaUniform, theta);
 
-  // The following block of code together with the
-  // definitions in object.js are provided for diagnosis
-  //
-  // For full credit, REPLACE THE FOLLOWING BLOCK with
-  // a block that loads the vertices and faces from the provided ply file
-  // You are encouraged to explore THREE.js by using ChatGPT
-  // to investigate how to load a PLY file and get
-  // access to the vertices and faces
-  //
-
-  /* vertices = getVertices(); // currently defined in object.js
-  indexList = getFaces();
-  t = getFaces(); */
-
-  // load the object.ply model instead of using the object.js
-  const model = await loadPlyModel("./object.ply");
-
-  vertices = model.vertices;
-  indexList = model.indices;
-  t = model.indices;
-
-  numVertices = vertices.length;
-  numTriangles = indexList.length / 3;
-  // End of block on reading vertices and faces that you should replace
-
-  var indexBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-  gl.bufferData(
-    gl.ELEMENT_ARRAY_BUFFER,
-    new Uint16Array(indexList),
-    gl.STATIC_DRAW
-  );
-
-  var verticesBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, verticesBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
-
-  var vertexPosition = gl.getAttribLocation(myShaderProgram, "vertexPosition");
-  gl.vertexAttribPointer(vertexPosition, 4, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(vertexPosition);
+  clipX = 0.0;
 
   var e = vec3(0.0, 0.0, 4.0);
-  var a = vec3(14.0, 0.0, 0.0);
+  var a = vec3(0.0, 0.0, 0.0);
   var vup = vec3(0.0, 1.0, 0.0);
   var d = subtract(e, a);
   var dCopy = vec3(d[0], d[1], d[2]);
@@ -113,18 +81,45 @@ async function initGL() {
 
   M = inverse(minv);
 
-  near = 0.001;
-
-  far = 100;
-
   aspect = canvas.height / canvas.width;
   fovy = (45 * Math.PI) / 180;
+  M_x = mat4(
+    1,
+    0,
+    0,
+    0,
+    0,
+    Math.cos(theta),
+    -Math.sin(theta),
+    0,
+    0,
+    Math.sin(theta),
+    Math.cos(theta),
+    0,
+    0,
+    0,
+    0,
+    1
+  );
 
-  isLight1On = 0;
-  isLight2On = 0;
-  specularOn = 0;
-
-  alpha = 1;
+  M_y = mat4(
+    Math.cos(theta),
+    0,
+    -Math.sin(theta),
+    0,
+    0,
+    1,
+    0,
+    0,
+    Math.sin(theta),
+    0,
+    Math.cos(theta),
+    0,
+    0,
+    0,
+    0,
+    1
+  );
 
   Rotation = mat4(
     Math.cos(theta),
@@ -145,43 +140,34 @@ async function initGL() {
     1.0
   );
 
-  M = multiply(Rotation, M);
+  drawCube();
+
+  //var M_new = multiply(translateToOrigin, M);
+  //var Rotation = multiply(M_x, M_y);
+  var M_new = multiply(Rotation, M);
+  //M_new = multiply(translateBack, M_new);
 
   modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
-  gl.uniformMatrix4fv(modelViewMatrix, false, flatten(M));
+  gl.uniformMatrix4fv(modelViewMatrix, false, flatten(M_new));
 
   projectionMatrix = gl.getUniformLocation(myShaderProgram, "projectionMatrix");
+  isLight1On = 0;
+  isLight2On = 0;
+  specularOn = 0;
 
-  faceNormals = getFaceNormals(vertices, indexList, numTriangles);
-
-  // Calculate vertex normals
-  vertexNormals = getVertexNormals(
-    vertices,
-    indexList,
-    faceNormals,
-    numVertices,
-    numTriangles
-  );
-
-  // Create and bind a buffer for the vertex normals
-  var normalBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertexNormals), gl.STATIC_DRAW);
-
-  // Get the attribute location for normal vectors and enable it
-  var nvPosition = gl.getAttribLocation(myShaderProgram, "nv");
-  gl.vertexAttribPointer(nvPosition, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(nvPosition);
-
-  var alphaloc = gl.getUniformLocation(myShaderProgram, "alpha");
-  gl.uniform1f(alphaloc, alpha);
-
+  render();
   perspective();
   light1();
   light2();
 }
 
 function perspective() {
+  near = 0.001;
+
+  far = 100;
+
+  alpha = 1;
+
   test = near * Math.tan(fovy);
   right = test * aspect;
   left = -right;
@@ -207,7 +193,7 @@ function perspective() {
   );
   gl.uniformMatrix4fv(projectionMatrix, false, flatten(pPerspective));
 
-  drawObject();
+  render();
 }
 
 function light1() {
@@ -245,7 +231,7 @@ function light1() {
   var ksloc = gl.getUniformLocation(myShaderProgram, "ks1");
   gl.uniform3fv(ksloc, flatten(ks));
 
-  drawObject();
+  render();
 }
 
 function light2() {
@@ -296,7 +282,7 @@ function light2() {
   );
   gl.uniform1f(cutoffAngleLocation, Math.PI / 2); // The cutoff angle is 90 degrees
 
-  drawObject();
+  render();
 }
 
 function specular() {
@@ -305,100 +291,13 @@ function specular() {
   var specularOnLoc = gl.getUniformLocation(myShaderProgram, "specularOn");
   gl.uniform1f(specularOnLoc, specularOn);
 
-  drawObject();
+  render();
 }
 
-function drawObject() {
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.drawElements(gl.TRIANGLES, 3 * numTriangles, gl.UNSIGNED_SHORT, 0);
-}
-
-function getFaceNormals(vertices, indexList, numTriangles) {
-  var faceNormals = [];
-
-  for (var i = 0; i < numTriangles; i++) {
-    p0 = vertices[indexList[3 * i]];
-    p1 = vertices[indexList[3 * i + 1]];
-    p2 = vertices[indexList[3 * i + 2]];
-
-    var v1 = subtract(p1, p0);
-    var v2 = subtract(p2, p0);
-
-    var n = cross(v1, v2);
-    var nCopy = vec3(n[0], n[1], n[2]);
-    var n = normalize(nCopy);
-    faceNormals.push(n);
-  }
-
-  return faceNormals;
-}
-
-function getVertexNormals(
-  vertices,
-  indexList,
-  faceNormals,
-  numVertices,
-  numTriangles
-) {
-  var vertexNormals = [];
-
-  for (var j = 0; j < numVertices; j++) {
-    var vertexNormal = vec3(0.0, 0.0, 0.0); // Initialize to zero vector
-    for (var i = 0; i < numTriangles; i++) {
-      if (
-        indexList[3 * i] == j ||
-        indexList[3 * i + 1] == j ||
-        indexList[3 * i + 2] == j
-      ) {
-        vertexNormal = add(vertexNormal, faceNormals[i]); // Use vector addition
-      }
-    }
-    vertexNormal = normalize(vertexNormal);
-    vertexNormals.push(vertexNormal);
-  }
-
-  return vertexNormals;
-}
-
-async function loadPlyModel(url) {
-  const response = await fetch(url);
-  const text = await response.text();
-  const lines = text.split("\n");
-  const vertices = [];
-  const indices = [];
-
-  let readingVertices = false;
-  let readingFaces = false;
-  let vertexCount = 0;
-  let faceCount = 0;
-
-  for (const line of lines) {
-    if (line.startsWith("element vertex")) {
-      vertexCount = Number(line.split(" ")[2]);
-    } else if (line.startsWith("element face")) {
-      faceCount = Number(line.split(" ")[2]);
-    } else if (line.startsWith("end_header")) {
-      readingVertices = true;
-    } else if (readingVertices) {
-      const [x, y, z] = line.split(" ").map(Number);
-      vertices.push(vec4(x, y, z, 1.0));
-      vertexCount--;
-      if (vertexCount === 0) {
-        readingVertices = false;
-        readingFaces = true;
-      }
-    } else if (readingFaces) {
-      const [, ...verts] = line.split(" ").map(Number);
-      indices.push(...verts.slice(0, -1));
-      faceCount--;
-      if (faceCount === 0) {
-        readingFaces = false;
-      }
-    }
-  }
-
-  return { vertices, indices };
-}
+// function drawObject() {
+//   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+//   gl.drawElements(gl.TRIANGLES, 3 * numTriangles, gl.UNSIGNED_SHORT, 0);
+// }
 
 function multiply(A, B) {
   var res = mat4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -414,15 +313,87 @@ function multiply(A, B) {
 }
 
 function rotate(value) {
-  // Force WebGL context to clear the color buffer
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  theta += value;
+  M_x = mat4(
+    1,
+    0,
+    0,
+    0,
+    0,
+    Math.cos(theta),
+    -Math.sin(theta),
+    0,
+    0,
+    Math.sin(theta),
+    Math.cos(theta),
+    0,
+    0,
+    0,
+    0,
+    1
+  );
+  var beta = 0;
+  M_y = mat4(
+    Math.cos(beta),
+    0,
+    -Math.sin(beta),
+    0,
+    0,
+    1,
+    0,
+    0,
+    Math.sin(beta),
+    0,
+    Math.cos(beta),
+    0,
+    0,
+    0,
+    0,
+    1
+  );
 
-  theta += value; // rotat positive
-  //clipX += moveRight * nudge;
-  //clipY += moveUp * nudge;
+  M_x_model = gl.getUniformLocation(myShaderProgram, "M_x");
+  gl.uniformMatrix4fv(M_x_model, false, flatten(M_x));
+  M_y_model = gl.getUniformLocation(myShaderProgram, "M_y");
+  gl.uniformMatrix4fv(M_y_model, false, flatten(M_y));
 
-  gl.uniform1f(thetaUniform, theta);
-  //gl.uniform2f(mousePositionUniform, clipX, clipY);
+  var objectPos = [0, 0, -4];
+  var translateToOrigin = mat4(
+    1,
+    0,
+    0,
+    -objectPos[0],
+    0,
+    1,
+    0,
+    -objectPos[1],
+    0,
+    0,
+    1,
+    -objectPos[2],
+    0,
+    0,
+    0,
+    1
+  );
+  var translateBack = mat4(
+    1,
+    0,
+    0,
+    objectPos[0],
+    0,
+    1,
+    0,
+    objectPos[1],
+    0,
+    0,
+    1,
+    objectPos[2],
+    0,
+    0,
+    0,
+    1
+  );
 
   Rotation = mat4(
     Math.cos(theta),
@@ -443,11 +414,55 @@ function rotate(value) {
     1.0
   );
 
-  var MNew = multiply(Rotation, M);
+  var M_new = multiply(translateToOrigin, M);
+  //var Rotation = multiply(M_x, M_y);
+  console.log(M_new);
+  M_new = multiply(Rotation, M_new);
+  M_new = multiply(translateBack, M_new);
+  console.log(M);
+  console.log(M_new);
+
   modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
-  gl.uniformMatrix4fv(modelViewMatrix, false, flatten(MNew));
-  drawObject();
+  gl.uniformMatrix4fv(modelViewMatrix, false, flatten(M_new));
+
+  drawCube();
 }
+
+// function rotate(value) {
+//   // Force WebGL context to clear the color buffer
+//   gl.clear(gl.COLOR_BUFFER_BIT);
+
+//   theta += value; // rotat positive
+//   //clipX += moveRight * nudge;
+//   //clipY += moveUp * nudge;
+
+//   gl.uniform1f(thetaUniform, theta);
+//   //gl.uniform2f(mousePositionUniform, clipX, clipY);
+
+//   Rotation = mat4(
+//     Math.cos(theta),
+//     0.0,
+//     -Math.sin(theta),
+//     0.0,
+//     0.0,
+//     1.0,
+//     0.0,
+//     0.0,
+//     Math.sin(theta),
+//     0.0,
+//     Math.cos(theta),
+//     0.0,
+//     0.0,
+//     0.0,
+//     0.0,
+//     1.0
+//   );
+
+//   var MNew = multiply(Rotation, M);
+//   modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
+//   gl.uniformMatrix4fv(modelViewMatrix, false, flatten(MNew));
+//   drawObject();
+// }
 
 function rotatePos() {
   rotate(0.1);
@@ -455,4 +470,232 @@ function rotatePos() {
 
 function rotateNeg() {
   rotate(-0.1);
+}
+
+function render() {
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, textureImage);
+  gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
+
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, textureChecker);
+  gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap1"), 1);
+
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  var numVertices = 36;
+  gl.drawElements(gl.TRIANGLES, numVertices, gl.UNSIGNED_SHORT, 0);
+  requestAnimFrame(render);
+}
+
+function drawCube() {
+  var vertices = [
+    // Front face
+    -1.0 + clipX,
+    -1.0,
+    1.0,
+    1.0 + clipX,
+    -1.0,
+    1.0,
+    1.0 + clipX,
+    1.0,
+    1.0,
+    -1.0 + clipX,
+    1.0,
+    1.0,
+    // Back face
+    -1.0 + clipX,
+    -1.0,
+    -1.0,
+    -1.0 + clipX,
+    1.0,
+    -1.0,
+    1.0 + clipX,
+    1.0,
+    -1.0,
+    1.0 + clipX,
+    -1.0,
+    -1.0,
+    // Top face
+    -1.0 + clipX,
+    1.0,
+    -1.0,
+    -1.0 + clipX,
+    1.0,
+    1.0,
+    1.0 + clipX,
+    1.0,
+    1.0,
+    1.0 + clipX,
+    1.0,
+    -1.0,
+    // Bottom face
+    -1.0 + clipX,
+    -1.0,
+    -1.0,
+    1.0 + clipX,
+    -1.0,
+    -1.0,
+    1.0 + clipX,
+    -1.0,
+    1.0,
+    -1.0 + clipX,
+    -1.0,
+    1.0,
+    // Right face
+    1.0 + clipX,
+    -1.0,
+    -1.0,
+    1.0 + clipX,
+    1.0,
+    -1.0,
+    1.0 + clipX,
+    1.0,
+    1.0,
+    1.0 + clipX,
+    -1.0,
+    1.0,
+    // Left face
+    -1.0 + clipX,
+    -1.0,
+    -1.0,
+    -1.0 + clipX,
+    -1.0,
+    1.0,
+    -1.0 + clipX,
+    1.0,
+    1.0,
+    -1.0 + clipX,
+    1.0,
+    -1.0,
+  ];
+
+  var textureCoordinates = [
+    // Front
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Back
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Top
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Bottom
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Right
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Left
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+  ];
+
+  var indexList = [
+    //Front
+    0, 1, 2, 0, 2, 3,
+
+    //Back
+    4, 5, 6, 4, 6, 7,
+
+    //Top
+    8, 9, 10, 8, 10, 11,
+
+    //Bottom
+    12, 13, 14, 12, 14, 15,
+
+    //Right
+    16, 17, 18, 16, 18, 19,
+
+    //Left
+    20, 21, 22, 20, 22, 23,
+  ];
+
+  /* Checkerboard Texture */
+  var texSize = 64;
+  var numRows = 16;
+  var numCols = 16;
+
+  var myTexels = new Uint8Array(4 * texSize * texSize);
+
+  for (var i = 0; i < texSize; i++) {
+    for (var j = 0; j < texSize; j++) {
+      var patchx = Math.floor(i / (texSize / numRows));
+      var patchy = Math.floor(j / (texSize / numCols));
+      var c = 255;
+
+      myTexels[4 * i * texSize + 4 * j] = c; // r
+      myTexels[4 * i * texSize + 4 * j + 1] = c; // g
+      myTexels[4 * i * texSize + 4 * j + 2] = c; // b
+      myTexels[4 * i * texSize + 4 * j + 3] = 255; // opacity alpha
+    }
+  }
+  textureImage = gl.createTexture(); // for flower image
+  gl.bindTexture(gl.TEXTURE_2D, textureImage);
+  const myImage = new Image();
+  var url = "https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg";
+
+  myImage.crossOrigin = "anonymous";
+
+  myImage.onload = function () {
+    gl.bindTexture(gl.TEXTURE_2D, textureImage);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, myImage);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
+    return textureImage;
+  };
+  myImage.src = url;
+
+  textureChecker = gl.createTexture(); // for checkerboard
+  gl.bindTexture(gl.TEXTURE_2D, textureChecker);
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.RGBA,
+    texSize,
+    texSize,
+    0,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    myTexels
+  );
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+  iBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
+  gl.bufferData(
+    gl.ELEMENT_ARRAY_BUFFER,
+    new Uint16Array(indexList),
+    gl.STATIC_DRAW
+  );
+
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  vertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+
+  vertexPosition = gl.getAttribLocation(myShaderProgram, "vertexPosition");
+  gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(vertexPosition);
+
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  textureVertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
+
+  textureCoordinate = gl.getAttribLocation(
+    myShaderProgram,
+    "textureCoordinate"
+  );
+  gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(textureCoordinate);
+}
+
+function moveXPos() {
+  clipX += 0.1;
+  drawCube();
+}
+
+function moveXNeg() {
+  clipX -= 0.1;
+  drawCube();
 }
