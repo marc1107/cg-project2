@@ -43,11 +43,7 @@ async function initGL() {
   myShaderProgram = initShaders(gl, "vertex-shader", "fragment-shader");
   gl.useProgram(myShaderProgram);
 
-  /*theta = 0.0;
-  thetaUniform = gl.getUniformLocation(myShaderProgram, "theta");
-  gl.uniform1f(thetaUniform, theta);*/
-
-  clipX = 0.0;
+  clipX = 0.3;
 
   var cameraPos = [0.0, -1.0, 3.0];
 
@@ -441,49 +437,124 @@ function drawCube() {
   gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(textureCoordinate);
 
-  var numVertices = 36;
-  gl.drawElements(gl.TRIANGLES, numVertices, gl.UNSIGNED_SHORT, 0);
+  gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
 }
 
 function drawTable() {
   var vertices = [
-    // Table top (a large cube)
-    -1.0, 0.1, -1.0,
-    1.0, 0.1, -1.0,
-    1.0, 0.1, 1.0,
-    -1.0, 0.1, 1.0,
-    -1.0, -0.1, -1.0,
-    1.0, -0.1, -1.0,
-    1.0, -0.1, 1.0,
-    -1.0, -0.1, 1.0,
-    // Table leg (a smaller cube in the middle)
-    -0.1, -0.1, -0.1,
-    0.1, -0.1, -0.1,
-    0.1, -0.1, 0.1,
-    -0.1, -0.1, 0.1,
-    -0.1, -1.0, -0.1,
-    0.1, -1.0, -0.1,
-    0.1, -1.0, 0.1,
-    -0.1, -1.0, 0.1,
+    // Front face
+    -1.0, // X
+    -1.0,
+    1.0,
+    1.0, // X
+    -1.0,
+    1.0,
+    1.0, // X
+    1.0,
+    1.0,
+    -1.0, // X
+    1.0,
+    1.0,
+    // Back face
+    -1.0, // X
+    -1.0,
+    -1.0,
+    -1.0, // X
+    1.0,
+    -1.0,
+    1.0, // X
+    1.0,
+    -1.0,
+    1.0, // X
+    -1.0,
+    -1.0,
+    // Top face
+    -1.0, // X
+    1.0,
+    -1.0,
+    -1.0, // X
+    1.0,
+    1.0,
+    1.0, // X
+    1.0,
+    1.0,
+    1.0, // X
+    1.0,
+    -1.0,
+    // Bottom face
+    -1.0, // X
+    -1.0,
+    -1.0,
+    1.0, // X
+    -1.0,
+    -1.0,
+    1.0, // X
+    -1.0,
+    1.0,
+    -1.0, // X
+    -1.0,
+    1.0,
+    // Right face
+    1.0, // X
+    -1.0,
+    -1.0,
+    1.0, // X
+    1.0,
+    -1.0,
+    1.0, // X
+    1.0,
+    1.0,
+    1.0, // X
+    -1.0,
+    1.0,
+    // Left face
+    -1.0, // X
+    -1.0,
+    -1.0,
+    -1.0, // X
+    -1.0,
+    1.0,
+    -1.0, // X
+    1.0,
+    1.0,
+    -1.0, // X
+    1.0,
+    -1.0,
   ];
 
-  var textureCoordinates = new Array(48).fill(0.0, 0, 48);
+  var textureCoordinates = [
+    // Front
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Back
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Top
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Bottom
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Right
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Left
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+  ];
 
   var indexList = [
-    // Table top
+    //Front
     0, 1, 2, 0, 2, 3,
+
+    //Back
     4, 5, 6, 4, 6, 7,
+
+    //Top
     8, 9, 10, 8, 10, 11,
+
+    //Bottom
     12, 13, 14, 12, 14, 15,
+
+    //Right
     16, 17, 18, 16, 18, 19,
+
+    //Left
     20, 21, 22, 20, 22, 23,
-    // Table leg
-    24, 25, 26, 24, 26, 27,
-    28, 29, 30, 28, 30, 31,
-    32, 33, 34, 32, 34, 35,
-    36, 37, 38, 36, 38, 39,
-    40, 41, 42, 40, 42, 43,
-    44, 45, 46, 44, 46, 47,
   ];
 
   var image = document.getElementById("flowerimg");
@@ -526,8 +597,7 @@ function drawTable() {
   gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(textureCoordinate);
 
-  var numVertices = vertices.length / 3;
-  gl.drawElements(gl.TRIANGLES, numVertices, gl.UNSIGNED_SHORT, 0);
+  gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
 }
 
 /*
