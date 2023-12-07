@@ -1,30 +1,16 @@
 // Name: Cathrine Underbjerg Hansen and Marc Bohner
 
 var gl;
-var numVertices;
-var numTriangles;
 var near, far;
 var aspect, fovy, left, right, bottom, test;
 var projectionMatrix;
-var R;
-var indexList;
 var myShaderProgram;
 var isLight1On, isLight2On;
 var specularOn;
-var vertexNormals;
-var faceNormals;
 var alpha;
-var thetaUniform;
-var theta;
-var Rotation;
-var rotationMatrix;
 var M;
 var modelViewMatrix;
-var M_x;
-var M_y;
-var vertexbuffer;
 var vertexPosition;
-var textureVertexbuffer;
 var textureCoordinate;
 var clipX;
 
@@ -81,35 +67,6 @@ async function initGL() {
 
   aspect = canvas.height / canvas.width;
   fovy = (45 * Math.PI) / 180;
-
-  var angle = -0.1;
-
-  Rotation = mat4(
-    1.0, 0.0, 0.0, 0.0,
-    0.0, Math.cos(angle), -Math.sin(angle), 0.0,
-    0.0, Math.sin(angle), Math.cos(angle), 0.0,
-    0.0, 0.0, 0.0, 1.0
-  );
-
-  // Create translation matrices
-  var translateToOrigin = mat4(
-    1, 0, 0, -cameraPos[0],
-    0, 1, 0, -cameraPos[1],
-    0, 0, 1, -cameraPos[2],
-    0, 0, 0, 1
-  );
-
-  var translateBack = mat4(
-    1, 0, 0, cameraPos[0],
-    0, 1, 0, cameraPos[1],
-    0, 0, 1, cameraPos[2],
-    0, 0, 0, 1
-  );
-
-// Translate to origin, rotate, then translate back
-  //M = multiply(translateToOrigin, M);
-  //M = multiply(Rotation, M);
-  //M = multiply(translateBack, M);
 
   modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
   gl.uniformMatrix4fv(modelViewMatrix, false, flatten(M));
@@ -253,19 +210,6 @@ function specular() {var specularOnLoc = gl.getUniformLocation(myShaderProgram, 
   gl.uniform1f(specularOnLoc, specularOn);
 
   render();
-}
-
-function multiply(A, B) {
-  var res = mat4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  var N = 4;
-  for (var i = 0; i < N; i++) {
-    for (var j = 0; j < N; j++) {
-      for (var k = 0; k < N; k++) {
-        res[i][j] += A[i][k] * B[k][j];
-      }
-    }
-  }
-  return res;
 }
 
 function render() {
@@ -1369,128 +1313,3 @@ function drawTableLeg() {
 
   gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
 }
-
-/*
-function rotate(value) {
-  theta += value;
-  M_x = mat4(
-      1,
-      0,
-      0,
-      0,
-      0,
-      Math.cos(theta),
-      -Math.sin(theta),
-      0,
-      0,
-      Math.sin(theta),
-      Math.cos(theta),
-      0,
-      0,
-      0,
-      0,
-      1
-  );
-  var beta = 0;
-  M_y = mat4(
-      Math.cos(beta),
-      0,
-      -Math.sin(beta),
-      0,
-      0,
-      1,
-      0,
-      0,
-      Math.sin(beta),
-      0,
-      Math.cos(beta),
-      0,
-      0,
-      0,
-      0,
-      1
-  );
-
-  M_x_model = gl.getUniformLocation(myShaderProgram, "M_x");
-  gl.uniformMatrix4fv(M_x_model, false, flatten(M_x));
-  M_y_model = gl.getUniformLocation(myShaderProgram, "M_y");
-  gl.uniformMatrix4fv(M_y_model, false, flatten(M_y));
-
-  var objectPos = [0, 0, -4];
-  var translateToOrigin = mat4(
-      1,
-      0,
-      0,
-      -objectPos[0],
-      0,
-      1,
-      0,
-      -objectPos[1],
-      0,
-      0,
-      1,
-      -objectPos[2],
-      0,
-      0,
-      0,
-      1
-  );
-  var translateBack = mat4(
-      1,
-      0,
-      0,
-      objectPos[0],
-      0,
-      1,
-      0,
-      objectPos[1],
-      0,
-      0,
-      1,
-      objectPos[2],
-      0,
-      0,
-      0,
-      1
-  );
-
-  Rotation = mat4(
-      Math.cos(theta),
-      0.0,
-      -Math.sin(theta),
-      0.0,
-      0.0,
-      1.0,
-      0.0,
-      0.0,
-      Math.sin(theta),
-      0.0,
-      Math.cos(theta),
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      1.0
-  );
-
-  var M_new = multiply(translateToOrigin, M);
-  //var Rotation = multiply(M_x, M_y);
-  console.log(M_new);
-  M_new = multiply(Rotation, M_new);
-  M_new = multiply(translateBack, M_new);
-  console.log(M);
-  console.log(M_new);
-
-  modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
-  gl.uniformMatrix4fv(modelViewMatrix, false, flatten(M_new));
-
-  drawCube();
-}
-
-function rotatePos() {
-  rotate(0.1);
-}
-
-function rotateNeg() {
-  rotate(-0.1);
-}*/
