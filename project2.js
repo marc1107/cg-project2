@@ -43,14 +43,12 @@ async function initGL() {
   myShaderProgram = initShaders(gl, "vertex-shader", "fragment-shader");
   gl.useProgram(myShaderProgram);
 
-  /*theta = 0.0;
-  thetaUniform = gl.getUniformLocation(myShaderProgram, "theta");
-  gl.uniform1f(thetaUniform, theta);*/
+  clipX = 1.0;
 
-  clipX = 0.0;
+  var cameraPos = [0.0, -1.0, 3.0];
 
-  var e = vec3(0.0, 0.0, 4.0);
-  var a = vec3(0.0, 0.0, 0.0);
+  var e = vec3(cameraPos[0], cameraPos[1], cameraPos[2]);
+  var a = vec3(0.0, 1.0, 0.0);
   var vup = vec3(0.0, 1.0, 0.0);
   var d = subtract(e, a);
   var dCopy = vec3(d[0], d[1], d[2]);
@@ -83,64 +81,35 @@ async function initGL() {
 
   aspect = canvas.height / canvas.width;
   fovy = (45 * Math.PI) / 180;
-  M_x = mat4(
-    1,
-    0,
-    0,
-    0,
-    0,
-    Math.cos(theta),
-    -Math.sin(theta),
-    0,
-    0,
-    Math.sin(theta),
-    Math.cos(theta),
-    0,
-    0,
-    0,
-    0,
-    1
-  );
 
-  M_y = mat4(
-    Math.cos(theta),
-    0,
-    -Math.sin(theta),
-    0,
-    0,
-    1,
-    0,
-    0,
-    Math.sin(theta),
-    0,
-    Math.cos(theta),
-    0,
-    0,
-    0,
-    0,
-    1
-  );
+  var angle = -0.1;
 
   Rotation = mat4(
-    Math.cos(theta),
-    0.0,
-    -Math.sin(theta),
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    Math.sin(theta),
-    0.0,
-    Math.cos(theta),
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    1.0
+    1.0, 0.0, 0.0, 0.0,
+    0.0, Math.cos(angle), -Math.sin(angle), 0.0,
+    0.0, Math.sin(angle), Math.cos(angle), 0.0,
+    0.0, 0.0, 0.0, 1.0
   );
 
-  drawCube();
+  // Create translation matrices
+  var translateToOrigin = mat4(
+    1, 0, 0, -cameraPos[0],
+    0, 1, 0, -cameraPos[1],
+    0, 0, 1, -cameraPos[2],
+    0, 0, 0, 1
+  );
+
+  var translateBack = mat4(
+    1, 0, 0, cameraPos[0],
+    0, 1, 0, cameraPos[1],
+    0, 0, 1, cameraPos[2],
+    0, 0, 0, 1
+  );
+
+// Translate to origin, rotate, then translate back
+  //M = multiply(translateToOrigin, M);
+  //M = multiply(Rotation, M);
+  //M = multiply(translateBack, M);
 
   modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
   gl.uniformMatrix4fv(modelViewMatrix, false, flatten(M));
@@ -283,7 +252,7 @@ function specular() {var specularOnLoc = gl.getUniformLocation(myShaderProgram, 
   render();
 }
 
-/*function multiply(A, B) {
+function multiply(A, B) {
   var res = mat4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   var N = 4;
   for (var i = 0; i < N; i++) {
@@ -294,12 +263,13 @@ function specular() {var specularOnLoc = gl.getUniformLocation(myShaderProgram, 
     }
   }
   return res;
-}*/
+}
 
 function render() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  drawCube();
-  drawCube2();
+  //drawCube();
+  drawChair();
+  drawTable();
   requestAnimFrame(render);
 }
 
@@ -308,89 +278,177 @@ function moveXPos() {
 }
 
 function moveXNeg() {
-  clipX -= 0.1;
+  if (clipX >= 1.0)
+    clipX -= 0.1;
 }
 
-function drawCube() {
+function drawChair() {
+  drawChairTop();
+  drawChairLeg1();
+  drawChairLeg2();
+  drawChairLeg3();
+  drawChairLeg4();
+  drawChairBack();
+}
+
+function drawChairTop() {
+  const x_min = -0.3;
+  const x_max = 0.3;
+  const y_min = -0.5;
+  const y_max = -0.55;
+  const z_min = -0.3;
+  const z_max = 0.3;
+
+  var vertices = [
+  // Front face
+  x_min + clipX, y_min, z_max,
+  x_max + clipX, y_min, z_max,
+  x_max + clipX, y_max, z_max,
+  x_min + clipX, y_max, z_max,
+  // Back face
+  x_min + clipX, y_min, z_min,
+  x_min + clipX, y_max, z_min,
+  x_max + clipX, y_max, z_min,
+  x_max + clipX, y_min, z_min,
+  // Top face
+  x_min + clipX, y_max, z_min,
+  x_min + clipX, y_max, z_max,
+  x_max + clipX, y_max, z_max,
+  x_max + clipX, y_max, z_min,
+  // Bottom face
+  x_min + clipX, y_min, z_min,
+  x_max + clipX, y_min, z_min,
+  x_max + clipX, y_min, z_max,
+  x_min + clipX, y_min, z_max,
+  // Right face
+  x_max + clipX, y_min, z_min,
+  x_max + clipX, y_max, z_min,
+  x_max + clipX, y_max, z_max,
+  x_max + clipX, y_min, z_max,
+  // Left face
+  x_min + clipX, y_min, z_min,
+  x_min + clipX, y_min, z_max,
+  x_min + clipX, y_max, z_max,
+  x_min + clipX, y_max, z_min,
+];
+
+  var textureCoordinates = [
+    // Front
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Back
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Top
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Bottom
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Right
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Left
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+  ];
+
+  var indexList = [
+    //Front
+    0, 1, 2, 0, 2, 3,
+
+    //Back
+    4, 5, 6, 4, 6, 7,
+
+    //Top
+    8, 9, 10, 8, 10, 11,
+
+    //Bottom
+    12, 13, 14, 12, 14, 15,
+
+    //Right
+    16, 17, 18, 16, 18, 19,
+
+    //Left
+    20, 21, 22, 20, 22, 23,
+  ];
+
+  var image = document.getElementById("chairimg");
+
+  var textureImage = gl.createTexture(); // for flower image
+  gl.bindTexture(gl.TEXTURE_2D, textureImage);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  //gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
+    //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
+
+  var iBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
+  gl.bufferData(
+    gl.ELEMENT_ARRAY_BUFFER,
+    new Uint16Array(indexList),
+    gl.STATIC_DRAW
+  );
+
+  var vertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+
+  var vertexPosition = gl.getAttribLocation(myShaderProgram, "vertexPosition");
+  gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(vertexPosition);
+
+  var textureVertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
+
+  var textureCoordinate = gl.getAttribLocation(
+    myShaderProgram,
+    "textureCoordinate"
+  );
+  gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(textureCoordinate);
+
+  gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
+}
+
+function drawChairLeg1() {
+  const x_min = -0.3;
+  const x_max = -0.25;
+  const y_min = -1.0;
+  const y_max = -0.5;
+  const z_min = 0.25;
+  const z_max = 0.3;
+
   var vertices = [
     // Front face
-    -1.0 + clipX,
-    -1.0,
-    1.0,
-    1.0 + clipX,
-    -1.0,
-    1.0,
-    1.0 + clipX,
-    1.0,
-    1.0,
-    -1.0 + clipX,
-    1.0,
-    1.0,
+    x_min + clipX, y_min, z_max,
+    x_max + clipX, y_min, z_max,
+    x_max + clipX, y_max, z_max,
+    x_min + clipX, y_max, z_max,
     // Back face
-    -1.0 + clipX,
-    -1.0,
-    -1.0,
-    -1.0 + clipX,
-    1.0,
-    -1.0,
-    1.0 + clipX,
-    1.0,
-    -1.0,
-    1.0 + clipX,
-    -1.0,
-    -1.0,
+    x_min + clipX, y_min, z_min,
+    x_min + clipX, y_max, z_min,
+    x_max + clipX, y_max, z_min,
+    x_max + clipX, y_min, z_min,
     // Top face
-    -1.0 + clipX,
-    1.0,
-    -1.0,
-    -1.0 + clipX,
-    1.0,
-    1.0,
-    1.0 + clipX,
-    1.0,
-    1.0,
-    1.0 + clipX,
-    1.0,
-    -1.0,
+    x_min + clipX, y_max, z_min,
+    x_min + clipX, y_max, z_max,
+    x_max + clipX, y_max, z_max,
+    x_max + clipX, y_max, z_min,
     // Bottom face
-    -1.0 + clipX,
-    -1.0,
-    -1.0,
-    1.0 + clipX,
-    -1.0,
-    -1.0,
-    1.0 + clipX,
-    -1.0,
-    1.0,
-    -1.0 + clipX,
-    -1.0,
-    1.0,
+    x_min + clipX, y_min, z_min,
+    x_max + clipX, y_min, z_min,
+    x_max + clipX, y_min, z_max,
+    x_min + clipX, y_min, z_max,
     // Right face
-    1.0 + clipX,
-    -1.0,
-    -1.0,
-    1.0 + clipX,
-    1.0,
-    -1.0,
-    1.0 + clipX,
-    1.0,
-    1.0,
-    1.0 + clipX,
-    -1.0,
-    1.0,
+    x_max + clipX, y_min, z_min,
+    x_max + clipX, y_max, z_min,
+    x_max + clipX, y_max, z_max,
+    x_max + clipX, y_min, z_max,
     // Left face
-    -1.0 + clipX,
-    -1.0,
-    -1.0,
-    -1.0 + clipX,
-    -1.0,
-    1.0,
-    -1.0 + clipX,
-    1.0,
-    1.0,
-    -1.0 + clipX,
-    1.0,
-    -1.0,
+    x_min + clipX, y_min, z_min,
+    x_min + clipX, y_min, z_max,
+    x_min + clipX, y_max, z_max,
+    x_min + clipX, y_max, z_min,
   ];
 
   var textureCoordinates = [
@@ -428,7 +486,7 @@ function drawCube() {
     20, 21, 22, 20, 22, 23,
   ];
 
-  var image = document.getElementById("tableimg");
+  var image = document.getElementById("chairimg");
 
   var textureImage = gl.createTexture(); // for flower image
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
@@ -439,17 +497,17 @@ function drawCube() {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   //gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
-    //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
+  //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
 
   var iBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
   gl.bufferData(
-    gl.ELEMENT_ARRAY_BUFFER,
-    new Uint16Array(indexList),
-    gl.STATIC_DRAW
+      gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(indexList),
+      gl.STATIC_DRAW
   );
 
-  vertexbuffer = gl.createBuffer();
+  var vertexbuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
 
@@ -462,94 +520,569 @@ function drawCube() {
   gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
 
   var textureCoordinate = gl.getAttribLocation(
-    myShaderProgram,
-    "textureCoordinate"
+      myShaderProgram,
+      "textureCoordinate"
   );
   gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(textureCoordinate);
 
-  var numVertices = 36;
-  gl.drawElements(gl.TRIANGLES, numVertices, gl.UNSIGNED_SHORT, 0);
+  gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
 }
 
-function drawCube2() {
+function drawChairLeg2() {
+  const x_min = 0.3;
+  const x_max = 0.25;
+  const y_min = -1.0;
+  const y_max = -0.5;
+  const z_min = 0.25;
+  const z_max = 0.3;
+
   var vertices = [
     // Front face
+    x_min + clipX, y_min, z_max,
+    x_max + clipX, y_min, z_max,
+    x_max + clipX, y_max, z_max,
+    x_min + clipX, y_max, z_max,
+    // Back face
+    x_min + clipX, y_min, z_min,
+    x_min + clipX, y_max, z_min,
+    x_max + clipX, y_max, z_min,
+    x_max + clipX, y_min, z_min,
+    // Top face
+    x_min + clipX, y_max, z_min,
+    x_min + clipX, y_max, z_max,
+    x_max + clipX, y_max, z_max,
+    x_max + clipX, y_max, z_min,
+    // Bottom face
+    x_min + clipX, y_min, z_min,
+    x_max + clipX, y_min, z_min,
+    x_max + clipX, y_min, z_max,
+    x_min + clipX, y_min, z_max,
+    // Right face
+    x_max + clipX, y_min, z_min,
+    x_max + clipX, y_max, z_min,
+    x_max + clipX, y_max, z_max,
+    x_max + clipX, y_min, z_max,
+    // Left face
+    x_min + clipX, y_min, z_min,
+    x_min + clipX, y_min, z_max,
+    x_min + clipX, y_max, z_max,
+    x_min + clipX, y_max, z_min,
+  ];
+
+  var textureCoordinates = [
+    // Front
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Back
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Top
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Bottom
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Right
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Left
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+  ];
+
+  var indexList = [
+    //Front
+    0, 1, 2, 0, 2, 3,
+
+    //Back
+    4, 5, 6, 4, 6, 7,
+
+    //Top
+    8, 9, 10, 8, 10, 11,
+
+    //Bottom
+    12, 13, 14, 12, 14, 15,
+
+    //Right
+    16, 17, 18, 16, 18, 19,
+
+    //Left
+    20, 21, 22, 20, 22, 23,
+  ];
+
+  var image = document.getElementById("chairimg");
+
+  var textureImage = gl.createTexture(); // for flower image
+  gl.bindTexture(gl.TEXTURE_2D, textureImage);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  //gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
+  //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
+
+  var iBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
+  gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(indexList),
+      gl.STATIC_DRAW
+  );
+
+  var vertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+
+  var vertexPosition = gl.getAttribLocation(myShaderProgram, "vertexPosition");
+  gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(vertexPosition);
+
+  var textureVertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
+
+  var textureCoordinate = gl.getAttribLocation(
+      myShaderProgram,
+      "textureCoordinate"
+  );
+  gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(textureCoordinate);
+
+  gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
+}
+
+function drawChairLeg3() {
+  const x_min = -0.3;
+  const x_max = -0.25;
+  const y_min = -1.0;
+  const y_max = -0.5;
+  const z_min = -0.25;
+  const z_max = -0.3;
+
+  var vertices = [
+    // Front face
+    x_min + clipX, y_min, z_max,
+    x_max + clipX, y_min, z_max,
+    x_max + clipX, y_max, z_max,
+    x_min + clipX, y_max, z_max,
+    // Back face
+    x_min + clipX, y_min, z_min,
+    x_min + clipX, y_max, z_min,
+    x_max + clipX, y_max, z_min,
+    x_max + clipX, y_min, z_min,
+    // Top face
+    x_min + clipX, y_max, z_min,
+    x_min + clipX, y_max, z_max,
+    x_max + clipX, y_max, z_max,
+    x_max + clipX, y_max, z_min,
+    // Bottom face
+    x_min + clipX, y_min, z_min,
+    x_max + clipX, y_min, z_min,
+    x_max + clipX, y_min, z_max,
+    x_min + clipX, y_min, z_max,
+    // Right face
+    x_max + clipX, y_min, z_min,
+    x_max + clipX, y_max, z_min,
+    x_max + clipX, y_max, z_max,
+    x_max + clipX, y_min, z_max,
+    // Left face
+    x_min + clipX, y_min, z_min,
+    x_min + clipX, y_min, z_max,
+    x_min + clipX, y_max, z_max,
+    x_min + clipX, y_max, z_min,
+  ];
+
+  var textureCoordinates = [
+    // Front
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Back
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Top
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Bottom
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Right
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Left
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+  ];
+
+  var indexList = [
+    //Front
+    0, 1, 2, 0, 2, 3,
+
+    //Back
+    4, 5, 6, 4, 6, 7,
+
+    //Top
+    8, 9, 10, 8, 10, 11,
+
+    //Bottom
+    12, 13, 14, 12, 14, 15,
+
+    //Right
+    16, 17, 18, 16, 18, 19,
+
+    //Left
+    20, 21, 22, 20, 22, 23,
+  ];
+
+  var image = document.getElementById("chairimg");
+
+  var textureImage = gl.createTexture(); // for flower image
+  gl.bindTexture(gl.TEXTURE_2D, textureImage);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  //gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
+  //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
+
+  var iBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
+  gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(indexList),
+      gl.STATIC_DRAW
+  );
+
+  var vertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+
+  var vertexPosition = gl.getAttribLocation(myShaderProgram, "vertexPosition");
+  gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(vertexPosition);
+
+  var textureVertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
+
+  var textureCoordinate = gl.getAttribLocation(
+      myShaderProgram,
+      "textureCoordinate"
+  );
+  gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(textureCoordinate);
+
+  gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
+}
+
+function drawChairLeg4() {
+  const x_min = 0.3;
+  const x_max = 0.25;
+  const y_min = -1.0;
+  const y_max = -0.5;
+  const z_min = -0.25;
+  const z_max = -0.3;
+
+  var vertices = [
+    // Front face
+    x_min + clipX, y_min, z_max,
+    x_max + clipX, y_min, z_max,
+    x_max + clipX, y_max, z_max,
+    x_min + clipX, y_max, z_max,
+    // Back face
+    x_min + clipX, y_min, z_min,
+    x_min + clipX, y_max, z_min,
+    x_max + clipX, y_max, z_min,
+    x_max + clipX, y_min, z_min,
+    // Top face
+    x_min + clipX, y_max, z_min,
+    x_min + clipX, y_max, z_max,
+    x_max + clipX, y_max, z_max,
+    x_max + clipX, y_max, z_min,
+    // Bottom face
+    x_min + clipX, y_min, z_min,
+    x_max + clipX, y_min, z_min,
+    x_max + clipX, y_min, z_max,
+    x_min + clipX, y_min, z_max,
+    // Right face
+    x_max + clipX, y_min, z_min,
+    x_max + clipX, y_max, z_min,
+    x_max + clipX, y_max, z_max,
+    x_max + clipX, y_min, z_max,
+    // Left face
+    x_min + clipX, y_min, z_min,
+    x_min + clipX, y_min, z_max,
+    x_min + clipX, y_max, z_max,
+    x_min + clipX, y_max, z_min,
+  ];
+
+  var textureCoordinates = [
+    // Front
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Back
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Top
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Bottom
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Right
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Left
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+  ];
+
+  var indexList = [
+    //Front
+    0, 1, 2, 0, 2, 3,
+
+    //Back
+    4, 5, 6, 4, 6, 7,
+
+    //Top
+    8, 9, 10, 8, 10, 11,
+
+    //Bottom
+    12, 13, 14, 12, 14, 15,
+
+    //Right
+    16, 17, 18, 16, 18, 19,
+
+    //Left
+    20, 21, 22, 20, 22, 23,
+  ];
+
+  var image = document.getElementById("chairimg");
+
+  var textureImage = gl.createTexture(); // for flower image
+  gl.bindTexture(gl.TEXTURE_2D, textureImage);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  //gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
+  //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
+
+  var iBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
+  gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(indexList),
+      gl.STATIC_DRAW
+  );
+
+  var vertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+
+  var vertexPosition = gl.getAttribLocation(myShaderProgram, "vertexPosition");
+  gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(vertexPosition);
+
+  var textureVertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
+
+  var textureCoordinate = gl.getAttribLocation(
+      myShaderProgram,
+      "textureCoordinate"
+  );
+  gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(textureCoordinate);
+
+  gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
+}
+
+function drawChairBack() {
+  const x_min = 0.3;
+  const x_max = 0.25;
+  const y_min = -0.55;
+  const y_max = 0.0;
+  const z_min = -0.3;
+  const z_max = 0.3;
+
+  var vertices = [
+    // Front face
+    x_min + clipX, y_min, z_max,
+    x_max + clipX, y_min, z_max,
+    x_max + clipX, y_max, z_max,
+    x_min + clipX, y_max, z_max,
+    // Back face
+    x_min + clipX, y_min, z_min,
+    x_min + clipX, y_max, z_min,
+    x_max + clipX, y_max, z_min,
+    x_max + clipX, y_min, z_min,
+    // Top face
+    x_min + clipX, y_max, z_min,
+    x_min + clipX, y_max, z_max,
+    x_max + clipX, y_max, z_max,
+    x_max + clipX, y_max, z_min,
+    // Bottom face
+    x_min + clipX, y_min, z_min,
+    x_max + clipX, y_min, z_min,
+    x_max + clipX, y_min, z_max,
+    x_min + clipX, y_min, z_max,
+    // Right face
+    x_max + clipX, y_min, z_min,
+    x_max + clipX, y_max, z_min,
+    x_max + clipX, y_max, z_max,
+    x_max + clipX, y_min, z_max,
+    // Left face
+    x_min + clipX, y_min, z_min,
+    x_min + clipX, y_min, z_max,
+    x_min + clipX, y_max, z_max,
+    x_min + clipX, y_max, z_min,
+  ];
+
+  var textureCoordinates = [
+    // Front
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Back
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Top
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Bottom
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Right
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Left
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+  ];
+
+  var indexList = [
+    //Front
+    0, 1, 2, 0, 2, 3,
+
+    //Back
+    4, 5, 6, 4, 6, 7,
+
+    //Top
+    8, 9, 10, 8, 10, 11,
+
+    //Bottom
+    12, 13, 14, 12, 14, 15,
+
+    //Right
+    16, 17, 18, 16, 18, 19,
+
+    //Left
+    20, 21, 22, 20, 22, 23,
+  ];
+
+  var image = document.getElementById("chairimg");
+
+  var textureImage = gl.createTexture(); // for flower image
+  gl.bindTexture(gl.TEXTURE_2D, textureImage);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  //gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
+  //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
+
+  var iBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
+  gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(indexList),
+      gl.STATIC_DRAW
+  );
+
+  var vertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+
+  var vertexPosition = gl.getAttribLocation(myShaderProgram, "vertexPosition");
+  gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(vertexPosition);
+
+  var textureVertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
+
+  var textureCoordinate = gl.getAttribLocation(
+      myShaderProgram,
+      "textureCoordinate"
+  );
+  gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(textureCoordinate);
+
+  gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
+}
+
+function drawCube() {
+  var vertices = [
+    // Front face
+    -1.0, // X
     -1.0,
+    1.0,
+    1.0, // X
     -1.0,
     1.0,
-    1.0,
-    -1.0,
-    1.0,
+    1.0, // X
     1.0,
     1.0,
-    1.0,
-    -1.0,
+    -1.0, // X
     1.0,
     1.0,
     // Back face
+    -1.0, // X
     -1.0,
     -1.0,
-    -1.0,
-    -1.0,
+    -1.0, // X
     1.0,
     -1.0,
-    1.0,
+    1.0, // X
     1.0,
     -1.0,
-    1.0,
+    1.0, // X
     -1.0,
     -1.0,
     // Top face
-    -1.0,
+    -1.0, // X
     1.0,
     -1.0,
-    -1.0,
+    -1.0, // X
     1.0,
     1.0,
+    1.0, // X
     1.0,
     1.0,
-    1.0,
-    1.0,
+    1.0, // X
     1.0,
     -1.0,
     // Bottom face
+    -1.0, // X
     -1.0,
     -1.0,
+    1.0, // X
+    -1.0,
+    -1.0,
+    1.0, // X
     -1.0,
     1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    -1.0,
-    1.0,
-    -1.0,
+    -1.0, // X
     -1.0,
     1.0,
     // Right face
-    1.0,
+    1.0, // X
     -1.0,
     -1.0,
-    1.0,
+    1.0, // X
     1.0,
     -1.0,
+    1.0, // X
     1.0,
     1.0,
-    1.0,
-    1.0,
+    1.0, // X
     -1.0,
     1.0,
     // Left face
+    -1.0, // X
     -1.0,
     -1.0,
-    -1.0,
-    -1.0,
-    -1.0,
-    1.0,
+    -1.0, // X
     -1.0,
     1.0,
+    -1.0, // X
     1.0,
-    -1.0,
+    1.0,
+    -1.0, // X
     1.0,
     -1.0,
   ];
@@ -610,7 +1143,7 @@ function drawCube2() {
       gl.STATIC_DRAW
   );
 
-  vertexbuffer = gl.createBuffer();
+  var vertexbuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
 
@@ -629,8 +1162,250 @@ function drawCube2() {
   gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(textureCoordinate);
 
-  var numVertices = 36;
-  gl.drawElements(gl.TRIANGLES, numVertices, gl.UNSIGNED_SHORT, 0);
+  gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
+}
+
+function drawTable() {
+    drawTableTop();
+    drawTableLeg();
+}
+
+function drawTableTop() {
+  const x_min = -1.0;
+  const x_max = 1.0;
+  const y_min = 0.1;
+  const y_max = 0.2;
+  const z_min = -1.0;
+  const z_max = 1.0;
+
+  var vertices = [
+  // Front face
+  x_min, y_min, z_max,
+  x_max, y_min, z_max,
+  x_max, y_max, z_max,
+  x_min, y_max, z_max,
+  // Back face
+  x_min, y_min, z_min,
+  x_min, y_max, z_min,
+  x_max, y_max, z_min,
+  x_max, y_min, z_min,
+  // Top face
+  x_min, y_max, z_min,
+  x_min, y_max, z_max,
+  x_max, y_max, z_max,
+  x_max, y_max, z_min,
+  // Bottom face
+  x_min, y_min, z_min,
+  x_max, y_min, z_min,
+  x_max, y_min, z_max,
+  x_min, y_min, z_max,
+  // Right face
+  x_max, y_min, z_min,
+  x_max, y_max, z_min,
+  x_max, y_max, z_max,
+  x_max, y_min, z_max,
+  // Left face
+  x_min, y_min, z_min,
+  x_min, y_min, z_max,
+  x_min, y_max, z_max,
+  x_min, y_max, z_min,
+];
+
+  var textureCoordinates = [
+    // Front
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Back
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Top
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Bottom
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Right
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Left
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+  ];
+
+  var indexList = [
+    //Front
+    0, 1, 2, 0, 2, 3,
+
+    //Back
+    4, 5, 6, 4, 6, 7,
+
+    //Top
+    8, 9, 10, 8, 10, 11,
+
+    //Bottom
+    12, 13, 14, 12, 14, 15,
+
+    //Right
+    16, 17, 18, 16, 18, 19,
+
+    //Left
+    20, 21, 22, 20, 22, 23,
+  ];
+
+  var image = document.getElementById("tableimg");
+
+  var textureImage = gl.createTexture(); // for flower image
+  gl.bindTexture(gl.TEXTURE_2D, textureImage);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  //gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
+  //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
+
+  var iBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
+  gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(indexList),
+      gl.STATIC_DRAW
+  );
+
+  var vertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+
+  var vertexPosition = gl.getAttribLocation(myShaderProgram, "vertexPosition");
+  gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(vertexPosition);
+
+  var textureVertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
+
+  var textureCoordinate = gl.getAttribLocation(
+      myShaderProgram,
+      "textureCoordinate"
+  );
+  gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(textureCoordinate);
+
+  gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
+}
+
+function drawTableLeg() {
+  const x_min = -0.1;
+  const x_max = 0.1;
+  const y_min = -1.0;
+  const y_max = 0.0;
+  const z_min = -0.1;
+  const z_max = 0.1;
+
+  var vertices = [
+  // Front face
+  x_min, y_min, z_max,
+  x_max, y_min, z_max,
+  x_max, y_max, z_max,
+  x_min, y_max, z_max,
+  // Back face
+  x_min, y_min, z_min,
+  x_min, y_max, z_min,
+  x_max, y_max, z_min,
+  x_max, y_min, z_min,
+  // Top face
+  x_min, y_max, z_min,
+  x_min, y_max, z_max,
+  x_max, y_max, z_max,
+  x_max, y_max, z_min,
+  // Bottom face
+  x_min, y_min, z_min,
+  x_max, y_min, z_min,
+  x_max, y_min, z_max,
+  x_min, y_min, z_max,
+  // Right face
+  x_max, y_min, z_min,
+  x_max, y_max, z_min,
+  x_max, y_max, z_max,
+  x_max, y_min, z_max,
+  // Left face
+  x_min, y_min, z_min,
+  x_min, y_min, z_max,
+  x_min, y_max, z_max,
+  x_min, y_max, z_min,
+];
+
+  var textureCoordinates = [
+    // Front
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Back
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Top
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Bottom
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Right
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    // Left
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+  ];
+
+  var indexList = [
+    //Front
+    0, 1, 2, 0, 2, 3,
+
+    //Back
+    4, 5, 6, 4, 6, 7,
+
+    //Top
+    8, 9, 10, 8, 10, 11,
+
+    //Bottom
+    12, 13, 14, 12, 14, 15,
+
+    //Right
+    16, 17, 18, 16, 18, 19,
+
+    //Left
+    20, 21, 22, 20, 22, 23,
+  ];
+
+  var image = document.getElementById("tableimg");
+
+  var textureImage = gl.createTexture(); // for flower image
+  gl.bindTexture(gl.TEXTURE_2D, textureImage);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  //gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
+  //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
+
+  var iBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
+  gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(indexList),
+      gl.STATIC_DRAW
+  );
+
+  var vertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+
+  var vertexPosition = gl.getAttribLocation(myShaderProgram, "vertexPosition");
+  gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(vertexPosition);
+
+  var textureVertexbuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexbuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
+
+  var textureCoordinate = gl.getAttribLocation(
+      myShaderProgram,
+      "textureCoordinate"
+  );
+  gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(textureCoordinate);
+
+  gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
 }
 
 /*
