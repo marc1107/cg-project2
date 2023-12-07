@@ -115,9 +115,9 @@ async function initGL() {
   gl.uniformMatrix4fv(modelViewMatrix, false, flatten(M));
 
   projectionMatrix = gl.getUniformLocation(myShaderProgram, "projectionMatrix");
-  isLight1On = 1;
-  isLight2On = 1;
-  specularOn = 1;
+  isLight1On = 0;
+  isLight2On = 0;
+  specularOn = 0;
 
   render();
   perspective();
@@ -162,6 +162,7 @@ function perspective() {
 }
 
 function light1() {
+  isLight1On = 1- isLight1On;
   var p0 = vec3(1.2, 0.8, 1.9); // Point light position
   var Ia = vec3(0.2 * isLight1On, 0.2 * isLight1On, 0.2 * isLight1On); // Ambient light intensity
   var Id = vec3(1.0 * isLight1On, 1.0 * isLight1On, 1.0 * isLight1On); // Diffuse light intensity
@@ -198,7 +199,8 @@ function light1() {
 }
 
 function light2() {
-  var p0 = vec3(1.5, 0.0, -1.5);
+  isLight2On = 1 - isLight2On;
+  var p0 = vec3(1.5, 1.5, -0.5);
   var Ia = vec3(1.0 * isLight2On, 1.0 * isLight2On, 1.0 * isLight2On);
   var Id = vec3(1.0 * isLight2On, 1.0 * isLight2On, 1.0 * isLight2On);
   var Is = vec3(1.0 * isLight2On, 1.0 * isLight2On, 1.0 * isLight2On);
@@ -247,6 +249,7 @@ function light2() {
 }
 
 function specular() {var specularOnLoc = gl.getUniformLocation(myShaderProgram, "specularOn");
+  specularOn = 1 - specularOn;
   gl.uniform1f(specularOnLoc, specularOn);
 
   render();
@@ -267,7 +270,7 @@ function multiply(A, B) {
 
 function render() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  //drawCube();
+  drawChessBoard();
   drawChair();
   drawTable();
   requestAnimFrame(render);
@@ -1005,102 +1008,61 @@ function drawChairBack() {
   gl.drawElements(gl.TRIANGLES, indexList.length, gl.UNSIGNED_SHORT, 0);
 }
 
-function drawCube() {
+function drawChessBoard() {
+  const x_min = 0.15;
+  const x_max = 0.95;
+  const y_min = 0.2;
+  const y_max = 0.25;
+  const z_min = -0.4;
+  const z_max = 0.4;
+
   var vertices = [
     // Front face
-    -1.0, // X
-    -1.0,
-    1.0,
-    1.0, // X
-    -1.0,
-    1.0,
-    1.0, // X
-    1.0,
-    1.0,
-    -1.0, // X
-    1.0,
-    1.0,
+    x_min, y_min, z_max,
+    x_max, y_min, z_max,
+    x_max, y_max, z_max,
+    x_min, y_max, z_max,
     // Back face
-    -1.0, // X
-    -1.0,
-    -1.0,
-    -1.0, // X
-    1.0,
-    -1.0,
-    1.0, // X
-    1.0,
-    -1.0,
-    1.0, // X
-    -1.0,
-    -1.0,
+    x_min, y_min, z_min,
+    x_min, y_max, z_min,
+    x_max, y_max, z_min,
+    x_max, y_min, z_min,
     // Top face
-    -1.0, // X
-    1.0,
-    -1.0,
-    -1.0, // X
-    1.0,
-    1.0,
-    1.0, // X
-    1.0,
-    1.0,
-    1.0, // X
-    1.0,
-    -1.0,
+    x_min, y_max, z_min,
+    x_min, y_max, z_max,
+    x_max, y_max, z_max,
+    x_max, y_max, z_min,
     // Bottom face
-    -1.0, // X
-    -1.0,
-    -1.0,
-    1.0, // X
-    -1.0,
-    -1.0,
-    1.0, // X
-    -1.0,
-    1.0,
-    -1.0, // X
-    -1.0,
-    1.0,
+    x_min, y_min, z_min,
+    x_max, y_min, z_min,
+    x_max, y_min, z_max,
+    x_min, y_min, z_max,
     // Right face
-    1.0, // X
-    -1.0,
-    -1.0,
-    1.0, // X
-    1.0,
-    -1.0,
-    1.0, // X
-    1.0,
-    1.0,
-    1.0, // X
-    -1.0,
-    1.0,
+    x_max, y_min, z_min,
+    x_max, y_max, z_min,
+    x_max, y_max, z_max,
+    x_max, y_min, z_max,
     // Left face
-    -1.0, // X
-    -1.0,
-    -1.0,
-    -1.0, // X
-    -1.0,
-    1.0,
-    -1.0, // X
-    1.0,
-    1.0,
-    -1.0, // X
-    1.0,
-    -1.0,
+    x_min, y_min, z_min,
+    x_min, y_min, z_max,
+    x_min, y_max, z_max,
+    x_min, y_max, z_min,
   ];
 
   var textureCoordinates = [
-    // Front
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-    // Back
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-    // Top
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-    // Bottom
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-    // Right
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-    // Left
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-  ];
+  // Front
+  0.5, 0.5, 1.0, 0.5, 1.0, 1.0, 0.5, 1.0,
+  // Back
+  0.5, 0.5, 1.0, 0.5, 1.0, 1.0, 0.5, 1.0,
+  // Top
+  0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.5,
+  // Bottom
+  0.5, 0.5, 1.0, 0.5, 1.0, 1.0, 0.5, 1.0,
+  // Right
+  0.5, 0.5, 1.0, 0.5, 1.0, 1.0, 0.5, 1.0,
+  // Left
+  0.5, 0.5, 1.0, 0.5, 1.0, 1.0, 0.5, 1.0,
+];
 
   var indexList = [
     //Front
@@ -1122,7 +1084,7 @@ function drawCube() {
     20, 21, 22, 20, 22, 23,
   ];
 
-  var image = document.getElementById("flowerimg");
+  var image = document.getElementById("chessimg");
 
   var textureImage = gl.createTexture(); // for flower image
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
