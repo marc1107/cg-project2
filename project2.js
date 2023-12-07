@@ -272,7 +272,7 @@ function multiply(A, B) {
 function render() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   drawCube();
-  drawCube2();
+  drawTable();
   requestAnimFrame(render);
 }
 
@@ -445,7 +445,7 @@ function drawCube() {
   gl.drawElements(gl.TRIANGLES, numVertices, gl.UNSIGNED_SHORT, 0);
 }
 
-function drawCube2() {
+function drawTable() {
   var vertices = [
     // Table top (a large cube)
     -1.0, 0.1, -1.0,
