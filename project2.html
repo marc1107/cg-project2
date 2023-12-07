@@ -166,7 +166,7 @@
 
   <body onload="initGL()">
     <canvas id="gl-canvas" height="512" width="512"> </canvas>
-    <img id="flowerimg" hidden src="flower.jpg"/>
+    <img id="chessimg" hidden src="chess.jpg"/>
     <img id="tableimg" hidden src="table.jpg"/>
     <img id="chairimg" hidden src="chair.jpg"/>
     <br />
@@ -177,6 +177,11 @@
       </button>-->
       <button id="moveXNegButton" onclick="moveXNeg()">Move Chair Left</button>
 	  <button id="moveXPosButton" onclick="moveXPos()">Move Chair Right</button>
+    </div>
+    <div>
+      <button id="light1button" onclick="light1()">Light 1</button>
+      <button id="light2button" onclick="light2()">Light 2</button>
+      <button id="specularButton" onclick="specular()">Specular</button>
     </div>
     <br>
     <p>Chair stops when it reaches the table!</p>
