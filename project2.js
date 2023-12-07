@@ -449,7 +449,7 @@ function drawCube() {
     gl.STATIC_DRAW
   );
 
-  vertexbuffer = gl.createBuffer();
+  var vertexbuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
 
@@ -610,7 +610,7 @@ function drawCube2() {
       gl.STATIC_DRAW
   );
 
-  vertexbuffer = gl.createBuffer();
+  var vertexbuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
 
