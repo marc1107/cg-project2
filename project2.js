@@ -298,11 +298,7 @@ function specular() {var specularOnLoc = gl.getUniformLocation(myShaderProgram, 
 
 function render() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
-
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  var numVertices = 36;
-  gl.drawElements(gl.TRIANGLES, numVertices, gl.UNSIGNED_SHORT, 0);
+  drawCube();
   requestAnimFrame(render);
 }
 
@@ -433,28 +429,20 @@ function drawCube() {
     20, 21, 22, 20, 22, 23,
   ];
 
-  textureImage = gl.createTexture(); // for flower image
+  var image = document.getElementById("tableimg");
+
+  var textureImage = gl.createTexture(); // for flower image
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
-  const myImage = new Image();
-  /*var url = "https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg";*/
-  var url = "./flower.jpg";
-
-  myImage.crossOrigin = "anonymous";
-
-  myImage.onload = function () {
-    gl.bindTexture(gl.TEXTURE_2D, textureImage);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, myImage);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
     //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
-    return textureImage;
-  };
-  myImage.src = url;
 
-  iBuffer = gl.createBuffer();
+  var iBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
   gl.bufferData(
     gl.ELEMENT_ARRAY_BUFFER,
@@ -467,23 +455,21 @@ function drawCube() {
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
 
-  vertexPosition = gl.getAttribLocation(myShaderProgram, "vertexPosition");
+  var vertexPosition = gl.getAttribLocation(myShaderProgram, "vertexPosition");
   gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vertexPosition);
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  textureVertexbuffer = gl.createBuffer();
+  var textureVertexbuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexbuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
 
-  textureCoordinate = gl.getAttribLocation(
+  var textureCoordinate = gl.getAttribLocation(
     myShaderProgram,
     "textureCoordinate"
   );
   gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(textureCoordinate);
-
-  gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   var numVertices = 36;
@@ -493,81 +479,81 @@ function drawCube() {
 function drawCube2() {
   var vertices = [
     // Front face
-    -1.0,
-    -1.0,
-    1.0,
-    1.0,
+    -1.0 + clipX,
     -1.0,
     1.0,
-    1.0,
-    1.0,
-    1.0,
+    1.0 + clipX,
     -1.0,
+    1.0,
+    1.0 + clipX,
+    1.0,
+    1.0,
+    -1.0 + clipX,
     1.0,
     1.0,
     // Back face
+    -1.0 + clipX,
     -1.0,
     -1.0,
-    -1.0,
-    -1.0,
+    -1.0 + clipX,
     1.0,
     -1.0,
-    1.0,
+    1.0 + clipX,
     1.0,
     -1.0,
-    1.0,
+    1.0 + clipX,
     -1.0,
     -1.0,
     // Top face
-    -1.0,
+    -1.0 + clipX,
     1.0,
     -1.0,
-    -1.0,
+    -1.0 + clipX,
     1.0,
     1.0,
+    1.0 + clipX,
     1.0,
     1.0,
-    1.0,
-    1.0,
+    1.0 + clipX,
     1.0,
     -1.0,
     // Bottom face
+    -1.0 + clipX,
     -1.0,
     -1.0,
+    1.0 + clipX,
+    -1.0,
+    -1.0,
+    1.0 + clipX,
     -1.0,
     1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    -1.0,
-    1.0,
-    -1.0,
+    -1.0 + clipX,
     -1.0,
     1.0,
     // Right face
-    1.0,
+    1.0 + clipX,
     -1.0,
     -1.0,
-    1.0,
+    1.0 + clipX,
     1.0,
     -1.0,
+    1.0 + clipX,
     1.0,
     1.0,
-    1.0,
-    1.0,
+    1.0 + clipX,
     -1.0,
     1.0,
     // Left face
+    -1.0 + clipX,
     -1.0,
     -1.0,
-    -1.0,
-    -1.0,
-    -1.0,
-    1.0,
+    -1.0 + clipX,
     -1.0,
     1.0,
+    -1.0 + clipX,
     1.0,
-    -1.0,
+    1.0,
+    -1.0 + clipX,
     1.0,
     -1.0,
   ];
@@ -607,66 +593,21 @@ function drawCube2() {
     20, 21, 22, 20, 22, 23,
   ];
 
-  /* Checkerboard Texture */
-  var texSize = 64;
-  var numRows = 16;
-  var numCols = 16;
+  var image = document.getElementById("tableimg");
 
-  var myTexels = new Uint8Array(4 * texSize * texSize);
-
-  for (var i = 0; i < texSize; i++) {
-    for (var j = 0; j < texSize; j++) {
-      var patchx = Math.floor(i / (texSize / numRows));
-      var patchy = Math.floor(j / (texSize / numCols));
-      var c = 255;
-
-      myTexels[4 * i * texSize + 4 * j] = c; // r
-      myTexels[4 * i * texSize + 4 * j + 1] = c; // g
-      myTexels[4 * i * texSize + 4 * j + 2] = c; // b
-      myTexels[4 * i * texSize + 4 * j + 3] = 255; // opacity alpha
-    }
-  }
   var textureImage = gl.createTexture(); // for flower image
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
-  const myImage = new Image();
-  /*var url = "https://c1.staticflickr.com/9/8873/18598400202_3af67ef38f_q.jpg";*/
-  var url = "./table.jpg";
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
+  //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
 
-  myImage.crossOrigin = "anonymous";
-
-  myImage.onload = function () {
-    gl.bindTexture(gl.TEXTURE_2D, textureImage);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, myImage);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
-    return textureImage;
-  };
-  myImage.src = url;
-
-  var textureChecker = gl.createTexture(); // for checkerboard
-  gl.bindTexture(gl.TEXTURE_2D, textureChecker);
-  gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      texSize,
-      texSize,
-      0,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      myTexels
-  );
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-
-  var iBuffer2 = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer2);
+  var iBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
   gl.bufferData(
       gl.ELEMENT_ARRAY_BUFFER,
       new Uint16Array(indexList),
@@ -674,7 +615,7 @@ function drawCube2() {
   );
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  var vertexbuffer = gl.createBuffer();
+  vertexbuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
 
@@ -693,8 +634,8 @@ function drawCube2() {
   );
   gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(textureCoordinate);
-  gl.drawElements(gl.TRIANGLES, 72, gl.UNSIGNED_BYTE, 0);
 
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   var numVertices = 36;
   gl.drawElements(gl.TRIANGLES, numVertices, gl.UNSIGNED_SHORT, 0);
 }
