@@ -299,7 +299,7 @@ function specular() {var specularOnLoc = gl.getUniformLocation(myShaderProgram, 
 function render() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   drawCube();
-  //drawCube2();
+  drawCube2();
   requestAnimFrame(render);
 }
 
@@ -438,7 +438,7 @@ function drawCube() {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
+  //gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
     //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
 
   var iBuffer = gl.createBuffer();
@@ -449,7 +449,6 @@ function drawCube() {
     gl.STATIC_DRAW
   );
 
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   vertexbuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
@@ -458,7 +457,6 @@ function drawCube() {
   gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vertexPosition);
 
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   var textureVertexbuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexbuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
@@ -470,7 +468,6 @@ function drawCube() {
   gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(textureCoordinate);
 
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   var numVertices = 36;
   gl.drawElements(gl.TRIANGLES, numVertices, gl.UNSIGNED_SHORT, 0);
 }
@@ -602,7 +599,7 @@ function drawCube2() {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
+  //gl.uniform1i(gl.getUniformLocation(myShaderProgram, "texMap0"), 0);
   //gl.generateMipmap( gl.TEXTURE_2D ); // only use this if the image is a power of 2
 
   var iBuffer = gl.createBuffer();
@@ -613,7 +610,6 @@ function drawCube2() {
       gl.STATIC_DRAW
   );
 
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   vertexbuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
@@ -622,7 +618,6 @@ function drawCube2() {
   gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vertexPosition);
 
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   var textureVertexbuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, textureVertexbuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoordinates), gl.STATIC_DRAW);
@@ -634,7 +629,6 @@ function drawCube2() {
   gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(textureCoordinate);
 
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   var numVertices = 36;
   gl.drawElements(gl.TRIANGLES, numVertices, gl.UNSIGNED_SHORT, 0);
 }
