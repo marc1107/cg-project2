@@ -83,64 +83,6 @@ async function initGL() {
 
   aspect = canvas.height / canvas.width;
   fovy = (45 * Math.PI) / 180;
-  M_x = mat4(
-    1,
-    0,
-    0,
-    0,
-    0,
-    Math.cos(theta),
-    -Math.sin(theta),
-    0,
-    0,
-    Math.sin(theta),
-    Math.cos(theta),
-    0,
-    0,
-    0,
-    0,
-    1
-  );
-
-  M_y = mat4(
-    Math.cos(theta),
-    0,
-    -Math.sin(theta),
-    0,
-    0,
-    1,
-    0,
-    0,
-    Math.sin(theta),
-    0,
-    Math.cos(theta),
-    0,
-    0,
-    0,
-    0,
-    1
-  );
-
-  Rotation = mat4(
-    Math.cos(theta),
-    0.0,
-    -Math.sin(theta),
-    0.0,
-    0.0,
-    1.0,
-    0.0,
-    0.0,
-    Math.sin(theta),
-    0.0,
-    Math.cos(theta),
-    0.0,
-    0.0,
-    0.0,
-    0.0,
-    1.0
-  );
-
-  drawCube();
 
   modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
   gl.uniformMatrix4fv(modelViewMatrix, false, flatten(M));
@@ -282,19 +224,6 @@ function specular() {var specularOnLoc = gl.getUniformLocation(myShaderProgram, 
 
   render();
 }
-
-/*function multiply(A, B) {
-  var res = mat4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  var N = 4;
-  for (var i = 0; i < N; i++) {
-    for (var j = 0; j < N; j++) {
-      for (var k = 0; k < N; k++) {
-        res[i][j] += A[i][k] * B[k][j];
-      }
-    }
-  }
-  return res;
-}*/
 
 function render() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
