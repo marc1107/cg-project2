@@ -151,9 +151,9 @@
       void main() {
       	vec4 color0 = texture2D( texMap0, fTextureCoordinate );
       	vec4 color1 = texture2D( texMap1, fTextureCoordinate );
-      	gl_FragColor.r = color0.r * color1.r + R.r;
-      	gl_FragColor.g = color0.g * color1.g + R.g;
-      	gl_FragColor.b = color0.b * color1.b + R.b;
+      	gl_FragColor.r = color0.r + R.r;
+      	gl_FragColor.g = color0.g + R.g;
+      	gl_FragColor.b = color0.b + R.b;
       	gl_FragColor.a = 1.0;
       }
     </script>
@@ -167,11 +167,11 @@
   <body onload="initGL()">
     <canvas id="gl-canvas" height="512" width="512"> </canvas>
     <br />
-    <div>
+    <div><!--
       <button id="rotateButton" onclick="rotatePos()">Rotate</button>
       <button id="rotateNegButton" onclick="rotateNeg()">
         Rotate Negative
-      </button>
+      </button>-->
 	  <button id="moveXPosButton" onclick="moveXPos()">Move X Positive</button>
 	  <button id="moveXNegButton" onclick="moveXNeg()">Move X Negative</button>
     </div>
