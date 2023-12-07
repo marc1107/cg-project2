@@ -43,9 +43,9 @@ async function initGL() {
   myShaderProgram = initShaders(gl, "vertex-shader", "fragment-shader");
   gl.useProgram(myShaderProgram);
 
-  clipX = 1.0;
+  clipX = 1.5;
 
-  var cameraPos = [0.0, -1.0, 3.0];
+  var cameraPos = [0.0, 0.4, 2.5];
 
   var e = vec3(cameraPos[0], cameraPos[1], cameraPos[2]);
   var a = vec3(0.0, 1.0, 0.0);
