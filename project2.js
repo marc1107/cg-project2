@@ -299,17 +299,16 @@ function specular() {var specularOnLoc = gl.getUniformLocation(myShaderProgram, 
 function render() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   drawCube();
+  //drawCube2();
   requestAnimFrame(render);
 }
 
 function moveXPos() {
   clipX += 0.1;
-  drawCube();
 }
 
 function moveXNeg() {
   clipX -= 0.1;
-  drawCube();
 }
 
 function drawCube() {
@@ -479,81 +478,81 @@ function drawCube() {
 function drawCube2() {
   var vertices = [
     // Front face
-    -1.0 + clipX,
+    -1.0,
     -1.0,
     1.0,
-    1.0 + clipX,
+    1.0,
     -1.0,
     1.0,
-    1.0 + clipX,
     1.0,
     1.0,
-    -1.0 + clipX,
+    1.0,
+    -1.0,
     1.0,
     1.0,
     // Back face
-    -1.0 + clipX,
     -1.0,
     -1.0,
-    -1.0 + clipX,
+    -1.0,
+    -1.0,
     1.0,
     -1.0,
-    1.0 + clipX,
+    1.0,
     1.0,
     -1.0,
-    1.0 + clipX,
+    1.0,
     -1.0,
     -1.0,
     // Top face
-    -1.0 + clipX,
+    -1.0,
     1.0,
     -1.0,
-    -1.0 + clipX,
+    -1.0,
     1.0,
     1.0,
-    1.0 + clipX,
     1.0,
     1.0,
-    1.0 + clipX,
+    1.0,
+    1.0,
     1.0,
     -1.0,
     // Bottom face
-    -1.0 + clipX,
     -1.0,
     -1.0,
-    1.0 + clipX,
-    -1.0,
-    -1.0,
-    1.0 + clipX,
     -1.0,
     1.0,
-    -1.0 + clipX,
+    -1.0,
+    -1.0,
+    1.0,
+    -1.0,
+    1.0,
+    -1.0,
     -1.0,
     1.0,
     // Right face
-    1.0 + clipX,
-    -1.0,
-    -1.0,
-    1.0 + clipX,
     1.0,
     -1.0,
-    1.0 + clipX,
+    -1.0,
     1.0,
     1.0,
-    1.0 + clipX,
+    -1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
     -1.0,
     1.0,
     // Left face
-    -1.0 + clipX,
     -1.0,
     -1.0,
-    -1.0 + clipX,
+    -1.0,
+    -1.0,
     -1.0,
     1.0,
-    -1.0 + clipX,
+    -1.0,
     1.0,
     1.0,
-    -1.0 + clipX,
+    -1.0,
     1.0,
     -1.0,
   ];
@@ -593,7 +592,7 @@ function drawCube2() {
     20, 21, 22, 20, 22, 23,
   ];
 
-  var image = document.getElementById("tableimg");
+  var image = document.getElementById("flowerimg");
 
   var textureImage = gl.createTexture(); // for flower image
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
