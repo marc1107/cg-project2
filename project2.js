@@ -49,8 +49,10 @@ async function initGL() {
 
   clipX = 0.0;
 
-  var e = vec3(0.0, 0.0, 4.0);
-  var a = vec3(0.0, 0.0, 0.0);
+  var cameraPos = [0.0, -1.0, 3.0];
+
+  var e = vec3(cameraPos[0], cameraPos[1], cameraPos[2]);
+  var a = vec3(0.0, 1.0, 0.0);
   var vup = vec3(0.0, 1.0, 0.0);
   var d = subtract(e, a);
   var dCopy = vec3(d[0], d[1], d[2]);
@@ -83,6 +85,35 @@ async function initGL() {
 
   aspect = canvas.height / canvas.width;
   fovy = (45 * Math.PI) / 180;
+
+  var angle = -0.1;
+
+  Rotation = mat4(
+    1.0, 0.0, 0.0, 0.0,
+    0.0, Math.cos(angle), -Math.sin(angle), 0.0,
+    0.0, Math.sin(angle), Math.cos(angle), 0.0,
+    0.0, 0.0, 0.0, 1.0
+  );
+
+  // Create translation matrices
+  var translateToOrigin = mat4(
+    1, 0, 0, -cameraPos[0],
+    0, 1, 0, -cameraPos[1],
+    0, 0, 1, -cameraPos[2],
+    0, 0, 0, 1
+  );
+
+  var translateBack = mat4(
+    1, 0, 0, cameraPos[0],
+    0, 1, 0, cameraPos[1],
+    0, 0, 1, cameraPos[2],
+    0, 0, 0, 1
+  );
+
+// Translate to origin, rotate, then translate back
+  //M = multiply(translateToOrigin, M);
+  //M = multiply(Rotation, M);
+  //M = multiply(translateBack, M);
 
   modelViewMatrix = gl.getUniformLocation(myShaderProgram, "modelViewMatrix");
   gl.uniformMatrix4fv(modelViewMatrix, false, flatten(M));
@@ -223,6 +254,19 @@ function specular() {var specularOnLoc = gl.getUniformLocation(myShaderProgram, 
   gl.uniform1f(specularOnLoc, specularOn);
 
   render();
+}
+
+function multiply(A, B) {
+  var res = mat4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  var N = 4;
+  for (var i = 0; i < N; i++) {
+    for (var j = 0; j < N; j++) {
+      for (var k = 0; k < N; k++) {
+        res[i][j] += A[i][k] * B[k][j];
+      }
+    }
+  }
+  return res;
 }
 
 function render() {
@@ -403,119 +447,43 @@ function drawCube() {
 
 function drawCube2() {
   var vertices = [
-    // Front face
-    -1.0,
-    -1.0,
-    1.0,
-    1.0,
-    -1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    -1.0,
-    1.0,
-    1.0,
-    // Back face
-    -1.0,
-    -1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    -1.0,
-    1.0,
-    1.0,
-    -1.0,
-    1.0,
-    -1.0,
-    -1.0,
-    // Top face
-    -1.0,
-    1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    -1.0,
-    // Bottom face
-    -1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    -1.0,
-    1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    // Right face
-    1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    1.0,
-    -1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    -1.0,
-    1.0,
-    // Left face
-    -1.0,
-    -1.0,
-    -1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    -1.0,
-    1.0,
-    1.0,
-    -1.0,
-    1.0,
-    -1.0,
+    // Table top (a large cube)
+    -1.0, 0.1, -1.0,
+    1.0, 0.1, -1.0,
+    1.0, 0.1, 1.0,
+    -1.0, 0.1, 1.0,
+    -1.0, -0.1, -1.0,
+    1.0, -0.1, -1.0,
+    1.0, -0.1, 1.0,
+    -1.0, -0.1, 1.0,
+    // Table leg (a smaller cube in the middle)
+    -0.1, -0.1, -0.1,
+    0.1, -0.1, -0.1,
+    0.1, -0.1, 0.1,
+    -0.1, -0.1, 0.1,
+    -0.1, -1.0, -0.1,
+    0.1, -1.0, -0.1,
+    0.1, -1.0, 0.1,
+    -0.1, -1.0, 0.1,
   ];
 
-  var textureCoordinates = [
-    // Front
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-    // Back
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-    // Top
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-    // Bottom
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-    // Right
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-    // Left
-    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-  ];
+  var textureCoordinates = new Array(48).fill(0.0, 0, 48);
 
   var indexList = [
-    //Front
+    // Table top
     0, 1, 2, 0, 2, 3,
-
-    //Back
     4, 5, 6, 4, 6, 7,
-
-    //Top
     8, 9, 10, 8, 10, 11,
-
-    //Bottom
     12, 13, 14, 12, 14, 15,
-
-    //Right
     16, 17, 18, 16, 18, 19,
-
-    //Left
     20, 21, 22, 20, 22, 23,
+    // Table leg
+    24, 25, 26, 24, 26, 27,
+    28, 29, 30, 28, 30, 31,
+    32, 33, 34, 32, 34, 35,
+    36, 37, 38, 36, 38, 39,
+    40, 41, 42, 40, 42, 43,
+    44, 45, 46, 44, 46, 47,
   ];
 
   var image = document.getElementById("flowerimg");
@@ -558,7 +526,7 @@ function drawCube2() {
   gl.vertexAttribPointer(textureCoordinate, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(textureCoordinate);
 
-  var numVertices = 36;
+  var numVertices = vertices.length / 3;
   gl.drawElements(gl.TRIANGLES, numVertices, gl.UNSIGNED_SHORT, 0);
 }
 
