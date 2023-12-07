@@ -268,7 +268,6 @@ function multiply(A, B) {
 function render() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   //drawCube();
-  //drawTable();
   drawChair();
   drawTable();
   requestAnimFrame(render);
@@ -279,7 +278,8 @@ function moveXPos() {
 }
 
 function moveXNeg() {
-  clipX -= 0.1;
+  if (clipX >= 1.0)
+    clipX -= 0.1;
 }
 
 function drawChair() {
@@ -1171,37 +1171,44 @@ function drawTable() {
 }
 
 function drawTableTop() {
+  const x_min = -1.0;
+  const x_max = 1.0;
+  const y_min = 0.1;
+  const y_max = 0.2;
+  const z_min = -1.0;
+  const z_max = 1.0;
+
   var vertices = [
   // Front face
-  -1.0, 0.0, 1.0,
-   1.0, 0.0, 1.0,
-   1.0, 0.1, 1.0,
-  -1.0, 0.1, 1.0,
+  x_min, y_min, z_max,
+  x_max, y_min, z_max,
+  x_max, y_max, z_max,
+  x_min, y_max, z_max,
   // Back face
-  -1.0, 0.0, -1.0,
-  -1.0, 0.1, -1.0,
-   1.0, 0.1, -1.0,
-   1.0, 0.0, -1.0,
+  x_min, y_min, z_min,
+  x_min, y_max, z_min,
+  x_max, y_max, z_min,
+  x_max, y_min, z_min,
   // Top face
-  -1.0, 0.1, -1.0,
-  -1.0, 0.1,  1.0,
-   1.0, 0.1,  1.0,
-   1.0, 0.1, -1.0,
+  x_min, y_max, z_min,
+  x_min, y_max, z_max,
+  x_max, y_max, z_max,
+  x_max, y_max, z_min,
   // Bottom face
-  -1.0, 0.0, -1.0,
-   1.0, 0.0, -1.0,
-   1.0, 0.0,  1.0,
-  -1.0, 0.0,  1.0,
+  x_min, y_min, z_min,
+  x_max, y_min, z_min,
+  x_max, y_min, z_max,
+  x_min, y_min, z_max,
   // Right face
-   1.0, 0.0, -1.0,
-   1.0, 0.1, -1.0,
-   1.0, 0.1,  1.0,
-   1.0, 0.0,  1.0,
+  x_max, y_min, z_min,
+  x_max, y_max, z_min,
+  x_max, y_max, z_max,
+  x_max, y_min, z_max,
   // Left face
-  -1.0, 0.0, -1.0,
-  -1.0, 0.0,  1.0,
-  -1.0, 0.1,  1.0,
-  -1.0, 0.1, -1.0,
+  x_min, y_min, z_min,
+  x_min, y_min, z_max,
+  x_min, y_max, z_max,
+  x_min, y_max, z_min,
 ];
 
   var textureCoordinates = [
@@ -1283,37 +1290,44 @@ function drawTableTop() {
 }
 
 function drawTableLeg() {
+  const x_min = -0.1;
+  const x_max = 0.1;
+  const y_min = -1.0;
+  const y_max = 0.0;
+  const z_min = -0.1;
+  const z_max = 0.1;
+
   var vertices = [
   // Front face
-  -0.1, -1.0, 0.1,
-   0.1, -1.0, 0.1,
-   0.1,  0.0, 0.1,
-  -0.1,  0.0, 0.1,
+  x_min, y_min, z_max,
+  x_max, y_min, z_max,
+  x_max, y_max, z_max,
+  x_min, y_max, z_max,
   // Back face
-  -0.1, -1.0, -0.1,
-  -0.1,  0.0, -0.1,
-   0.1,  0.0, -0.1,
-   0.1, -1.0, -0.1,
+  x_min, y_min, z_min,
+  x_min, y_max, z_min,
+  x_max, y_max, z_min,
+  x_max, y_min, z_min,
   // Top face
-  -0.1,  0.0, -0.1,
-  -0.1,  0.0,  0.1,
-   0.1,  0.0,  0.1,
-   0.1,  0.0, -0.1,
+  x_min, y_max, z_min,
+  x_min, y_max, z_max,
+  x_max, y_max, z_max,
+  x_max, y_max, z_min,
   // Bottom face
-  -0.1, -1.0, -0.1,
-   0.1, -1.0, -0.1,
-   0.1, -1.0,  0.1,
-  -0.1, -1.0,  0.1,
+  x_min, y_min, z_min,
+  x_max, y_min, z_min,
+  x_max, y_min, z_max,
+  x_min, y_min, z_max,
   // Right face
-   0.1, -1.0, -0.1,
-   0.1,  0.0, -0.1,
-   0.1,  0.0,  0.1,
-   0.1, -1.0,  0.1,
+  x_max, y_min, z_min,
+  x_max, y_max, z_min,
+  x_max, y_max, z_max,
+  x_max, y_min, z_max,
   // Left face
-  -0.1, -1.0, -0.1,
-  -0.1, -1.0,  0.1,
-  -0.1,  0.0,  0.1,
-  -0.1,  0.0, -0.1,
+  x_min, y_min, z_min,
+  x_min, y_min, z_max,
+  x_min, y_max, z_max,
+  x_min, y_max, z_min,
 ];
 
   var textureCoordinates = [
