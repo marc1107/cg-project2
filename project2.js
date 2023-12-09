@@ -80,7 +80,6 @@ async function initGL() {
   perspective();
   light1();
   light2();
-  specular();
 }
 
 function perspective() {
@@ -316,7 +315,7 @@ function drawChairTop() {
 
   var image = document.getElementById("chairimg");
 
-  var textureImage = gl.createTexture(); // for flower image
+  var textureImage = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
@@ -435,7 +434,7 @@ function drawChairLeg1() {
 
   var image = document.getElementById("chairimg");
 
-  var textureImage = gl.createTexture(); // for flower image
+  var textureImage = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
@@ -554,7 +553,7 @@ function drawChairLeg2() {
 
   var image = document.getElementById("chairimg");
 
-  var textureImage = gl.createTexture(); // for flower image
+  var textureImage = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
@@ -673,7 +672,7 @@ function drawChairLeg3() {
 
   var image = document.getElementById("chairimg");
 
-  var textureImage = gl.createTexture(); // for flower image
+  var textureImage = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
@@ -792,7 +791,7 @@ function drawChairLeg4() {
 
   var image = document.getElementById("chairimg");
 
-  var textureImage = gl.createTexture(); // for flower image
+  var textureImage = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
@@ -911,7 +910,7 @@ function drawChairBack() {
 
   var image = document.getElementById("chairimg");
 
-  var textureImage = gl.createTexture(); // for flower image
+  var textureImage = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
@@ -1030,7 +1029,7 @@ function drawChessBoard() {
 
   var image = document.getElementById("chessimg");
 
-  var textureImage = gl.createTexture(); // for flower image
+  var textureImage = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
@@ -1154,7 +1153,7 @@ function drawTableTop() {
 
   var image = document.getElementById("tableimg");
 
-  var textureImage = gl.createTexture(); // for flower image
+  var textureImage = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
@@ -1273,7 +1272,7 @@ function drawTableLeg() {
 
   var image = document.getElementById("tableimg");
 
-  var textureImage = gl.createTexture(); // for flower image
+  var textureImage = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, textureImage);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
